@@ -1,3 +1,7 @@
+## 3.2.14 (2025-09-29)
+* Update project
+* Update pdfium to 1.9.9
+
 ## 3.2.13 (2025-08-11)
 * Update project
 * Update libs to handle 16KB pages
