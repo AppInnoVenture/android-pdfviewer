@@ -15,9 +15,11 @@
  */
 package com.infomaniak.lib.pdfview;
 
+import android.content.Context;
 import android.os.AsyncTask;
 
 import com.infomaniak.lib.pdfview.source.DocumentSource;
+import com.infomaniak.lib.pdfview.util.FitPolicy;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 import com.shockwave.pdfium.util.Size;
@@ -29,6 +31,15 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
     private boolean cancelled;
 
     private WeakReference<PDFView> pdfViewReference;
+    private WeakReference<Context> contextReference;
+
+    private int pageSeparatorSpacing;
+    private int startSpacing;
+    private int endSpacing;
+    private boolean isAutoSpacingEnabled;
+    private boolean isSwipeVertical;
+    private boolean isFitEachPage;
+    private FitPolicy pageFitPolicy;
 
     private PdfiumCore pdfiumCore;
     private String password;
@@ -38,11 +49,21 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     DecodingAsyncTask(DocumentSource docSource, String password, int[] userPages, PDFView pdfView, PdfiumCore pdfiumCore) {
         this.docSource = docSource;
-        this.userPages = userPages;
-        this.cancelled = false;
-        this.pdfViewReference = new WeakReference<>(pdfView);
         this.password = password;
+        this.userPages = userPages;
         this.pdfiumCore = pdfiumCore;
+        cancelled = false;
+
+        pdfViewReference = new WeakReference<>(pdfView);
+        contextReference = new WeakReference<>(pdfView.getContext());
+
+        pageSeparatorSpacing = pdfView.getPageSeparatorSpacing();
+        startSpacing = pdfView.getStartSpacing();
+        endSpacing = pdfView.getEndSpacing();
+        isAutoSpacingEnabled = pdfView.isAutoSpacingEnabled();
+        isSwipeVertical = pdfView.isSwipeVertical();
+        isFitEachPage = pdfView.isFitEachPage();
+        pageFitPolicy = pdfView.getPageFitPolicy();
     }
 
     @Override
@@ -50,24 +71,26 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
         try {
             PDFView pdfView = pdfViewReference.get();
             if (pdfView != null) {
-                PdfDocument pdfDocument = docSource.createDocument(pdfView.getContext(), pdfiumCore, password);
+                PdfDocument pdfDocument = docSource.createDocument(contextReference.get(), pdfiumCore, password);
                 PDFSpacing pdfSpacing = new PDFSpacing(
-                        pdfView.getPageSeparatorSpacing(),
-                        pdfView.getStartSpacing(),
-                        pdfView.getEndSpacing(),
-                        pdfView.isAutoSpacingEnabled()
+                        pageSeparatorSpacing,
+                        startSpacing,
+                        endSpacing,
+                        isAutoSpacingEnabled
                 );
                 DisplayOptions displayOptions = new DisplayOptions(
-                        pdfView.isSwipeVertical(),
+                        isSwipeVertical,
                         pdfSpacing,
-                        pdfView.isFitEachPage(),
+                        isFitEachPage,
                         getViewSize(pdfView),
-                        pdfView.getPageFitPolicy());
+                        pageFitPolicy
+                );
                 pdfFile = new PdfFile(
                         pdfiumCore,
                         pdfDocument,
                         userPages,
-                        displayOptions);
+                        displayOptions
+                );
                 return null;
             } else {
                 return new NullPointerException("pdfView == null");
