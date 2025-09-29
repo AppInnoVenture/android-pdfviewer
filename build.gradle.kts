@@ -2,8 +2,7 @@ buildscript {
 
     extra.apply {
         set("libMinSdk", 21)
-        set("libCompileSdk", 35)
-        set("libTargetSdk", 35)
+        set("libCompileSdk", 36)
         set("libVersionName", "3.2.13")
         set("javaVersion", JavaVersion.VERSION_17)
         set("kotlinVersion", "2.0.21")

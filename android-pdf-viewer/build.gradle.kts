@@ -7,7 +7,6 @@ plugins {
 
 val libMinSdk: Int by rootProject.extra
 val libCompileSdk: Int by rootProject.extra
-val libTargetSdk: Int by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
 val libVersionName: String by rootProject.extra
 
@@ -17,7 +16,6 @@ android {
     defaultConfig {
         minSdk = libMinSdk
         compileSdk = libCompileSdk
-        targetSdk = libTargetSdk
     }
 
     publishing {
