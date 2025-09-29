@@ -20,7 +20,6 @@ plugins {
 
 val libMinSdk: Int by rootProject.extra
 val libCompileSdk: Int by rootProject.extra
-val libTargetSdk: Int by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
 
 android {
@@ -29,7 +28,7 @@ android {
     defaultConfig {
         minSdk = libMinSdk
         compileSdk = libCompileSdk
-        targetSdk = libTargetSdk
+        targetSdk = libCompileSdk
         versionCode = 3
     }
     buildFeatures { viewBinding = true }
