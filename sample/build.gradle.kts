@@ -29,7 +29,7 @@ android {
         minSdk = libMinSdk
         compileSdk = libCompileSdk
         targetSdk = libCompileSdk
-        versionCode = 3
+        versionCode = 4
     }
     buildFeatures { viewBinding = true }
 

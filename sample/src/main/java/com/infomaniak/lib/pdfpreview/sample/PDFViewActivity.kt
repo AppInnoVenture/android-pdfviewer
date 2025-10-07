@@ -127,6 +127,26 @@ class PDFViewActivity : AppCompatActivity(), OnPageChangeListener, OnLoadComplet
         loadPDF(binding.pdfView.fromUri(uri), password)
     }
 
+    private fun displayFromFile(file: File, password: String? = null) {
+        pdfFileName = file.name
+        loadPDF(binding.pdfView.fromFile(file), password)
+    }
+
+    private fun displayFromBytes(bytes: ByteArray, password: String? = null) {
+        pdfFileName = "document.pdf" // Default name as byte array has no inherent file name
+        loadPDF(binding.pdfView.fromBytes(bytes), password)
+    }
+
+    private fun displayFromStream(inputStream: InputStream, password: String? = null) {
+        pdfFileName = "stream.pdf" // Default name as stream has no inherent file name
+        loadPDF(binding.pdfView.fromStream(inputStream), password)
+    }
+
+    private fun displayFromSource(documentSource: DocumentSource, password: String? = null) {
+        pdfFileName = "source.pdf" // Default name as source has no inherent file name
+        loadPDF(binding.pdfView.fromSource(documentSource), password)
+    }
+
     private fun loadPDF(pdfConfigurator: Configurator, password: String? = null) {
         pdfConfigurator.defaultPage(pageNumber)
             .onPageChange(this)

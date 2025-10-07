@@ -12,7 +12,7 @@ Library for displaying PDF documents on Android, with `animations`, `gestures`, 
 It is based on [PdfiumAndroid](https://github.com/infomaniak/PdfiumAndroid) for decoding PDF files. Works on API 11 (Android 3.0) and higher.
 Licensed under Apache License 2.0.
 
-Link to the [Changelog](https://github.com/Infomaniak/android-pdfview/blob/master/CHANGELOG.md)
+Link to the [Changelog](https://github.com/AppInnoVenture/android-pdfviewer/blob/master/CHANGELOG.md)
 
 ## Installation
 
@@ -42,7 +42,7 @@ dependencyResolutionManagement {
 }
 ```
 
-`implementation 'com.github.Infomaniak:android-pdfview:3.2.13`
+`implementation 'com.github.Infomaniak:android-pdfview:3.2.14`
 
 ## ProGuard
 If you are using ProGuard, add following rule to proguard config file:
@@ -75,34 +75,34 @@ or
 pdfView.fromSource(DocumentSource)
 or
 pdfView.fromAsset(String)
-    .pages(0, 2, 1, 3, 3, 3) // all pages are displayed by default
-    .enableSwipe(true) // allows to block changing pages using swipe
-    .swipeHorizontal(false)
-    .enableDoubletap(true)
-    .defaultPage(0) // allows to draw something on the current page, usually visible in the middle of the screen
-    .onDraw(onDrawListener) // allows to draw something on all pages, separately for every page. Called only for visible pages
-    .onDrawAll(onDrawListener) // called after document is loaded and starts to be rendered
-    .onLoad(onLoadCompleteListener)
-    .onPageChange(onPageChangeListener)
-    .onPageScroll(onPageScrollListener)
-    .onError(onErrorListener)
-    .onPageError(onPageErrorListener) // called after document is rendered for the first time
-    .onRender(onRenderListener) // called on single tap, return true if handled, false to toggle scroll handle visibility
-    .onTap(onTapListener)
-    .onLongPress(onLongPressListener)
-    .enableAnnotationRendering(false) // render annotations (such as comments, colors or forms)
-    .password(null)
-    .scrollHandle(null) // improve rendering a little bit on low-res screens
-    .enableAntialiasing(true) // spacing between pages in dp. To define spacing color, set view background
-    .pageSeparatorSpacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-    .autoSpacing(false) // add dynamic spacing to fit each page on its own on the screen
-    .linkHandler(DefaultLinkHandler)
-    .pageFitPolicy(FitPolicy.WIDTH) // mode to fit pages in the view
-    .fitEachPage(false) // fit each page to the view, else smaller pages are scaled relative to largest page.
-    .pageSnap(false) // snap pages to screen boundaries
-    .pageFling(false) // make a fling change only a single page like ViewPager
-    .nightMode(false) // toggle night mode
-    .load();
+    .pages(0, 2, 1, 3, 3, 3) // Specifies which pages to display (e.g., pages 0, 1, 2, 3). By default, all pages are displayed.
+    .enableSwipe(true) // Enables or disables page changing via swipe gestures.
+    .swipeHorizontal(false) // Sets swipe direction: false for vertical scrolling, true for horizontal scrolling.
+    .enableDoubletap(true) // Enables or disables double-tap to zoom functionality.
+    .defaultPage(0) // Sets the initial page to display when the PDF is loaded.
+    .onDraw(onDrawListener) // Allows custom drawing on the current visible page, called for each visible page.
+    .onDrawAll(onDrawListener) // Allows custom drawing on all pages, called for each page individually when rendered.
+    .onLoad(onLoadCompleteListener) // Called when the PDF document is fully loaded.
+    .onPageChange(onPageChangeListener) // Called when the user navigates to a different page.
+    .onPageScroll(onPageScrollListener) // Called continuously during page scrolling.
+    .onError(onErrorListener) // Called when an error occurs while loading or rendering the PDF.
+    .onPageError(onPageErrorListener) // Called when an error occurs on a specific page during rendering.
+    .onRender(onRenderListener) // Called when the PDF document is rendered for the first time.
+    .onTap(onTapListener) // Called on a single tap; return true to handle the tap, false to toggle scroll handle visibility.
+    .onLongPress(onLongPressListener) // Called on a long press gesture.
+    .enableAnnotationRendering(false) // Enables or disables rendering of PDF annotations (e.g., comments, highlights, forms).
+    .password(null) // Sets the password for encrypted PDFs; null if no password is required.
+    .scrollHandle(null) // Sets a custom scroll handle; null to use the default handle or disable it.
+    .enableAntialiasing(true) // Enables or disables antialiasing for smoother rendering, especially on low-resolution screens.
+    .pageSeparatorSpacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP) // Sets the spacing (in dp) between pages; set view background to define spacing color.
+    .autoSpacing(false) // Enables or disables dynamic spacing to fit each page individually on the screen.
+    .linkHandler(DefaultLinkHandler) // Sets a handler for processing PDF links (e.g., URLs, page links).
+    .pageFitPolicy(FitPolicy.WIDTH) // Sets the page fit policy: FitPolicy.WIDTH, FitPolicy.HEIGHT, or FitPolicy.BOTH.
+    .fitEachPage(false) // If true, fits each page to the view; if false, smaller pages are scaled relative to the largest page.
+    .pageSnap(false) // If true, pages snap to screen boundaries during scrolling.
+    .pageFling(false) // If true, a fling gesture changes only one page at a time, similar to a ViewPager.
+    .nightMode(false) // Enables or disables night mode for inverted colors (dark background, light text).
+    .load(); // Loads and renders the PDF with the specified configurations.
 ```
 
 * `pages` is optional, it allows you to filter and order the pages of the PDF as you need
@@ -227,16 +227,7 @@ If you have any suggestions on making this lib better, write me, create issue or
 
 ## Sample Projects
 
-You can find a sample project in the [sample](https://github.com/Infomaniak/android-pdfview/tree/master/sample) folder.
-
-## Apps using the library
-
-<a href="https://github.com/Infomaniak/android-kDrive">
-    <img src="assets/infomaniak-kdrive.jpg" style="max-height: 300px; width: auto;" alt="Find App">
-</a>
-
-[Infomaniak kDrive](https://github.com/Infomaniak/android-kDrive) allows you to manage your Infomaniak files in a completely
-secure environment.
+You can find a sample project in the [sample](https://github.com/AppInnoVenture/android-pdfviewer/tree/master/sample) folder.
 
 ## License
 
