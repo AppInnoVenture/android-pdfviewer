@@ -25,54 +25,60 @@ public class ArrayUtils {
     }
 
     /**
-     * Transforms (0,1,2,2,3) to (0,1,2,3)
+     * Removes duplicates from a sorted array, e.g., (0,1,2,2,3) to (0,1,2,3)
      */
     public static int[] deleteDuplicatedPages(int[] pages) {
-        List<Integer> result = new ArrayList<>();
-        int lastInt = -1;
-        for (Integer currentInt : pages) {
-            if (lastInt != currentInt) {
-                result.add(currentInt);
+        if (pages == null || pages.length == 0) {
+            return pages == null ? new int[0] : pages;
+        }
+
+        // Count unique elements
+        int uniqueCount = 1;
+        for (int i = 1; i < pages.length; i++) {
+            if (pages[i] != pages[i - 1]) {
+                uniqueCount++;
             }
-            lastInt = currentInt;
         }
-        int[] arrayResult = new int[result.size()];
-        for (int i = 0; i < result.size(); i++) {
-            arrayResult[i] = result.get(i);
+
+        // Create result array and copy unique elements
+        int[] result = new int[uniqueCount];
+        result[0] = pages[0];
+        int index = 1;
+        for (int i = 1; i < pages.length; i++) {
+            if (pages[i] != pages[i - 1]) {
+                result[index++] = pages[i];
+            }
         }
-        return arrayResult;
+        return result;
     }
 
     /**
      * Transforms (0, 4, 4, 6, 6, 6, 3) into (0, 1, 1, 2, 2, 2, 3)
      */
     public static int[] calculateIndexesInDuplicateArray(int[] originalUserPages) {
-        int[] result = new int[originalUserPages.length];
-        if (originalUserPages.length == 0) {
-            return result;
+        if (originalUserPages == null || originalUserPages.length == 0) {
+            return new int[0];
         }
 
+        int[] result = new int[originalUserPages.length];
         int index = 0;
-        result[0] = index;
+        result[0] = 0;
         for (int i = 1; i < originalUserPages.length; i++) {
             if (originalUserPages[i] != originalUserPages[i - 1]) {
                 index++;
             }
             result[i] = index;
         }
-
         return result;
     }
 
+    /**
+     * Converts an array to a string representation, e.g., [1,2,3]
+     */
     public static String arrayToString(int[] array) {
-        StringBuilder builder = new StringBuilder("[");
-        for (int i = 0; i < array.length; i++) {
-            builder.append(array[i]);
-            if (i != array.length - 1) {
-                builder.append(",");
-            }
+        if (array == null || array.length == 0) {
+            return "[]";
         }
-        builder.append("]");
-        return builder.toString();
+        return Arrays.toString(array);
     }
 }

@@ -38,6 +38,16 @@ public class FileUtils {
         return outFile;
     }
 
+public static void copy(InputStream inputStream, File output) throws IOException {
+    try (FileOutputStream outputStream = new FileOutputStream(output)) {
+        byte[] buffer = new byte[8192]; // Increased buffer size
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+    }
+}
+
     public static void copy(InputStream inputStream, File output) throws IOException {
         OutputStream outputStream = null;
         try {

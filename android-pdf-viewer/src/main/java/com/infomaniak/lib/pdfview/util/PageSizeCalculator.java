@@ -18,25 +18,39 @@ package com.infomaniak.lib.pdfview.util;
 import com.shockwave.pdfium.util.Size;
 import com.shockwave.pdfium.util.SizeF;
 
+/**
+ * Utility class for calculating optimal page sizes for PDF rendering based on a fitting policy.
+ * This class determines how pages should be scaled to fit within a view, supporting width, height,
+ * or both dimensions fitting policies.
+ */
 public class PageSizeCalculator {
 
     private final Size originalMaxWidthPageSize;
     private final Size originalMaxHeightPageSize;
     private final Size viewSize;
-    private FitPolicy fitPolicy;
+    private final FitPolicy fitPolicy;
+    private final boolean fitEachPage;
     private SizeF optimalMaxWidthPageSize;
     private SizeF optimalMaxHeightPageSize;
     private float widthRatio;
     private float heightRatio;
-    private boolean fitEachPage;
 
-    public PageSizeCalculator(
-            FitPolicy fitPolicy,
-            Size originalMaxWidthPageSize,
-            Size originalMaxHeightPageSize,
-            Size viewSize,
-            boolean fitEachPage
-    ) {
+    /**
+     * Constructs a PageSizeCalculator with the specified fitting policy and page sizes.
+     *
+     * @param fitPolicy                Policy to determine how pages are scaled (WIDTH, HEIGHT, or BOTH).
+     * @param originalMaxWidthPageSize Original size of the widest page.
+     * @param originalMaxHeightPageSize Original size of the tallest page.
+     * @param viewSize                 Size of the view where pages are rendered.
+     * @param fitEachPage              If true, each page is scaled to fit the view; otherwise, uses calculated ratios.
+     * @throws IllegalArgumentException if any input parameter is null.
+     */
+    public PageSizeCalculator(FitPolicy fitPolicy, Size originalMaxWidthPageSize,
+                              Size originalMaxHeightPageSize, Size viewSize, boolean fitEachPage) {
+        if (fitPolicy == null || originalMaxWidthPageSize == null ||
+            originalMaxHeightPageSize == null || viewSize == null) {
+            throw new IllegalArgumentException("Parameters cannot be null");
+        }
         this.fitPolicy = fitPolicy;
         this.originalMaxWidthPageSize = originalMaxWidthPageSize;
         this.originalMaxHeightPageSize = originalMaxHeightPageSize;
@@ -45,8 +59,14 @@ public class PageSizeCalculator {
         calculateMaxPages();
     }
 
+    /**
+     * Calculates the optimal size for a given page based on the fitting policy.
+     *
+     * @param pageSize The original size of the page to be scaled.
+     * @return A SizeF object representing the scaled dimensions, or (0,0) if pageSize is invalid.
+     */
     public SizeF calculate(Size pageSize) {
-        if (pageSize.getWidth() <= 0 || pageSize.getHeight() <= 0) {
+        if (pageSize == null || pageSize.getWidth() <= 0 || pageSize.getHeight() <= 0) {
             return new SizeF(0, 0);
         }
         float maxWidth = fitEachPage ? viewSize.getWidth() : pageSize.getWidth() * widthRatio;
@@ -56,70 +76,111 @@ public class PageSizeCalculator {
                 return fitHeight(pageSize, maxHeight);
             case BOTH:
                 return fitBoth(pageSize, maxWidth, maxHeight);
+            case WIDTH:
             default:
                 return fitWidth(pageSize, maxWidth);
         }
     }
 
+    /**
+     * Gets the optimal size for the widest page after scaling.
+     *
+     * @return The scaled size of the widest page.
+     */
     public SizeF getOptimalMaxWidthPageSize() {
         return optimalMaxWidthPageSize;
     }
 
+    /**
+     * Gets the optimal size for the tallest page after scaling.
+     *
+     * @return The scaled size of the tallest page.
+     */
     public SizeF getOptimalMaxHeightPageSize() {
         return optimalMaxHeightPageSize;
     }
 
+    /**
+     * Calculates the optimal sizes and scaling ratios for the maximum width and height pages
+     * based on the fitting policy and view size.
+     */
     private void calculateMaxPages() {
         switch (fitPolicy) {
             case HEIGHT:
+                // Fit the tallest page to the view height and derive width ratio
                 optimalMaxHeightPageSize = fitHeight(originalMaxHeightPageSize, viewSize.getHeight());
                 heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
-                optimalMaxWidthPageSize = fitHeight(originalMaxWidthPageSize, originalMaxWidthPageSize.getHeight() * heightRatio);
-                break;
-            case BOTH:
-                SizeF localOptimalMaxWidth = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(), viewSize.getHeight());
-                float localWidthRatio = localOptimalMaxWidth.getWidth() / originalMaxWidthPageSize.getWidth();
-                this.optimalMaxHeightPageSize = fitBoth(originalMaxHeightPageSize,
-                        originalMaxHeightPageSize.getWidth() * localWidthRatio, viewSize.getHeight());
-                heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
-                optimalMaxWidthPageSize = fitBoth(originalMaxWidthPageSize, viewSize.getWidth(),
+                optimalMaxWidthPageSize = fitHeight(originalMaxWidthPageSize,
                         originalMaxWidthPageSize.getHeight() * heightRatio);
                 widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
                 break;
+            case BOTH:
+                // Fit the widest page to both view dimensions
+                optimalMaxWidthPageSize = fitBoth(originalMaxWidthPageSize,
+                        viewSize.getWidth(), viewSize.getHeight());
+                widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
+                // Apply the width ratio to the tallest page
+                optimalMaxHeightPageSize = fitBoth(originalMaxHeightPageSize,
+                        originalMaxHeightPageSize.getWidth() * widthRatio, viewSize.getHeight());
+                heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
+                break;
+            case WIDTH:
             default:
+                // Fit the widest page to the view width and derive height ratio
                 optimalMaxWidthPageSize = fitWidth(originalMaxWidthPageSize, viewSize.getWidth());
                 widthRatio = optimalMaxWidthPageSize.getWidth() / originalMaxWidthPageSize.getWidth();
-                optimalMaxHeightPageSize = fitWidth(originalMaxHeightPageSize, originalMaxHeightPageSize.getWidth() * widthRatio);
+                optimalMaxHeightPageSize = fitWidth(originalMaxHeightPageSize,
+                        originalMaxHeightPageSize.getWidth() * widthRatio);
+                heightRatio = optimalMaxHeightPageSize.getHeight() / originalMaxHeightPageSize.getHeight();
                 break;
         }
     }
 
+    /**
+     * Scales a page to fit a specified width while maintaining aspect ratio.
+     *
+     * @param pageSize The original page size.
+     * @param maxWidth The target width to fit.
+     * @return A SizeF object with the scaled dimensions.
+     */
     private SizeF fitWidth(Size pageSize, float maxWidth) {
-        float w = pageSize.getWidth(), h = pageSize.getHeight();
-        float ratio = w / h;
-        w = maxWidth;
-        h = (float) Math.floor(maxWidth / ratio);
-        return new SizeF(w, h);
+        float ratio = (float) pageSize.getWidth() / pageSize.getHeight();
+        float width = maxWidth;
+        float height = width / ratio;
+        return new SizeF(width, height);
     }
 
+    /**
+     * Scales a page to fit a specified height while maintaining aspect ratio.
+     *
+     * @param pageSize The original page size.
+     * @param maxHeight The target height to fit.
+     * @return A SizeF object with the scaled dimensions.
+     */
     private SizeF fitHeight(Size pageSize, float maxHeight) {
-        float w = pageSize.getWidth(), h = pageSize.getHeight();
-        float ratio = h / w;
-        h = maxHeight;
-        w = (float) Math.floor(maxHeight / ratio);
-        return new SizeF(w, h);
+        float ratio = (float) pageSize.getHeight() / pageSize.getWidth();
+        float height = maxHeight;
+        float width = height / ratio;
+        return new SizeF(width, height);
     }
 
+    /**
+     * Scales a page to fit both a specified width and height, using the smaller scaling factor
+     * to ensure the entire page fits within the view.
+     *
+     * @param pageSize The original page size.
+     * @param maxWidth The target width to fit.
+     * @param maxHeight The target height to fit.
+     * @return A SizeF object with the scaled dimensions.
+     */
     private SizeF fitBoth(Size pageSize, float maxWidth, float maxHeight) {
-        float w = pageSize.getWidth(), h = pageSize.getHeight();
-        float ratio = w / h;
-        w = maxWidth;
-        h = (float) Math.floor(maxWidth / ratio);
-        if (h > maxHeight) {
-            h = maxHeight;
-            w = (float) Math.floor(maxHeight * ratio);
+        float ratio = (float) pageSize.getWidth() / pageSize.getHeight();
+        float width = maxWidth;
+        float height = width / ratio;
+        if (height > maxHeight) {
+            height = maxHeight;
+            width = height * ratio;
         }
-        return new SizeF(w, h);
+        return new SizeF(width, height);
     }
-
 }

@@ -15,97 +15,107 @@
  */
 package com.infomaniak.lib.pdfview.util;
 
-public class MathUtils {
-
-    static private final int BIG_ENOUGH_INT = 16 * 1024;
-    static private final double BIG_ENOUGH_FLOOR = BIG_ENOUGH_INT;
-    static private final double BIG_ENOUGH_CEIL = 16384.999999999996;
+/**
+ * Utility class for mathematical operations used in the PDF viewer, such as limiting values and fast floor/ceiling calculations.
+ */
+public final class MathUtils {
+    private static final int BIG_ENOUGH_INT = 16 * 1024; // Constant for fast floor/ceiling calculations
+    private static final double BIG_ENOUGH_FLOOR = BIG_ENOUGH_INT; // Offset for floor calculation
+    private static final double BIG_ENOUGH_CEIL = 16384.999999999996; // Offset for ceiling calculation
 
     private MathUtils() {
-        // Prevents instantiation
+        throw new IllegalStateException("Utility class");
     }
 
     /**
-     * Limits the given <b>number</b> between the other values
+     * Limits an integer value to a specified range.
      *
-     * @param number  The number to limit.
-     * @param between The smallest value the number can take.
-     * @param and     The biggest value the number can take.
-     * @return The limited number.
+     * @param number  The value to limit.
+     * @param min     The smallest allowable value.
+     * @param max     The largest allowable value.
+     * @return The value constrained between min and max (inclusive).
      */
-    public static int limit(int number, int between, int and) {
-        if (number <= between) {
-            return between;
-        }
-        if (number >= and) {
-            return and;
-        }
-        return number;
+    public static int limit(int number, int min, int max) {
+        return Math.min(Math.max(number, min), max);
     }
 
     /**
-     * Limits the given <b>number</b> between the other values
+     * Limits a float value to a specified range.
      *
-     * @param number  The number to limit.
-     * @param between The smallest value the number can take.
-     * @param and     The biggest value the number can take.
-     * @return The limited number.
+     * @param number  The value to limit.
+     * @param min     The smallest allowable value.
+     * @param max     The largest allowable value.
+     * @return The value constrained between min and max (inclusive).
      */
-    public static float limit(float number, float between, float and) {
-        if (number <= between) {
-            return between;
-        }
-        if (number >= and) {
-            return and;
-        }
-        return number;
+    public static float limit(float number, float min, float max) {
+        return Math.min(Math.max(number, min), max);
     }
 
+    /**
+     * Returns the smaller of the given number and a maximum value.
+     *
+     * @param number The value to compare.
+     * @param max    The maximum allowable value.
+     * @return The smaller of number and max.
+     */
     public static float max(float number, float max) {
-        if (number > max) {
-            return max;
-        }
-        return number;
+        return Math.min(number, max); // Note: Method name kept as 'max' for compatibility
     }
 
+    /**
+     * Returns the larger of the given number and a minimum value.
+     *
+     * @param number The value to compare.
+     * @param min    The minimum allowable value.
+     * @return The larger of number and min.
+     */
     public static float min(float number, float min) {
-        if (number < min) {
-            return min;
-        }
-        return number;
+        return Math.max(number, min); // Note: Method name kept as 'min' for compatibility
     }
 
+    /**
+     * Returns the smaller of the given number and a maximum value.
+     *
+     * @param number The value to compare.
+     * @param max    The maximum allowable value.
+     * @return The smaller of number and max.
+     */
     public static int max(int number, int max) {
-        if (number > max) {
-            return max;
-        }
-        return number;
+        return Math.min(number, max); // Note: Method name kept as 'max' for compatibility
     }
 
+    /**
+     * Returns the larger of the given number and a minimum value.
+     *
+     * @param number The value to compare.
+     * @param min    The minimum allowable value.
+     * @return The larger of number and min.
+     */
     public static int min(int number, int min) {
-        if (number < min) {
-            return min;
-        }
-        return number;
+        return Math.max(number, min); // Note: Method name kept as 'min' for compatibility
     }
 
     /**
-     * Methods from libGDX - https://github.com/libgdx/libgdx
+     * Returns the largest integer less than or equal to the specified float.
+     * Works correctly for floats in the range -(2^14) to (Float.MAX_VALUE - 2^14).
+     * Adapted from libGDX.
+     *
+     * @param value The float value to floor.
+     * @return The largest integer less than or equal to the value.
      */
-
-    /**
-     * Returns the largest integer less than or equal to the specified float. This method will only properly floor floats from
-     * -(2^14) to (Float.MAX_VALUE - 2^14).
-     */
-    static public int floor(float value) {
+    public static int floor(float value) {
         return (int) (value + BIG_ENOUGH_FLOOR) - BIG_ENOUGH_INT;
     }
 
     /**
-     * Returns the smallest integer greater than or equal to the specified float. This method will only properly ceil floats from
-     * -(2^14) to (Float.MAX_VALUE - 2^14).
+     * Returns the smallest integer greater than or equal to the specified float.
+     * Works correctly for floats in the range -(2^14) to (Float.MAX_VALUE - 2^14).
+     * Adapted from libGDX.
+     *
+     * @param value The float value to ceil.
+     * @return The smallest integer greater than or equal to the value.
      */
-    static public int ceil(float value) {
+    public static int ceil(float value) {
         return (int) (value + BIG_ENOUGH_CEIL) - BIG_ENOUGH_INT;
     }
 }

@@ -22,20 +22,51 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Util {
-    private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+/**
+ * Utility class for common operations in the PDF viewer, such as unit conversion and stream handling.
+ */
+public final class Util {
+    private static final int DEFAULT_BUFFER_SIZE = 8192; // 8KB buffer for efficient I/O
 
-    public static int getDP(Context context, int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    private Util() {
+        throw new IllegalStateException("Utility class");
     }
 
-    public static byte[] toByteArray(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-        int n;
-        while (-1 != (n = inputStream.read(buffer))) {
-            os.write(buffer, 0, n);
+    /**
+     * Converts density-independent pixels (dp) to actual pixels based on the device's display metrics.
+     *
+     * @param context The Android context to access display metrics.
+     * @param dp      The value in density-independent pixels.
+     * @return The equivalent value in pixels, rounded to the nearest integer.
+     * @throws IllegalArgumentException if context is null.
+     */
+    public static int getDP(@NonNull Context context, float dp) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context cannot be null");
         }
-        return os.toByteArray();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+                context.getResources().getDisplayMetrics());
+    }
+
+    /**
+     * Converts an InputStream to a byte array.
+     *
+     * @param inputStream The input stream to read from.
+     * @return A byte array containing the stream's data.
+     * @throws IOException              if an I/O error occurs.
+     * @throws IllegalArgumentException if inputStream is null.
+     */
+    public static byte[] toByteArray(@NonNull InputStream inputStream) throws IOException {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("InputStream cannot be null");
+        }
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            return outputStream.toByteArray();
+        }
     }
 }

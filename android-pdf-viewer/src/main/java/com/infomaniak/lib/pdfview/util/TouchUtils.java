@@ -9,69 +9,94 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.infomaniak.lib.pdfview.PDFView;
 
-public class TouchUtils {
-
+/**
+ * Utility class for handling touch events in the PDF viewer, managing touch priority between views.
+ */
+public final class TouchUtils {
     public static final int DIRECTION_SCROLLING_LEFT = -1;
     public static final int DIRECTION_SCROLLING_RIGHT = 1;
-    static final int DIRECTION_SCROLLING_TOP = -1;
-    static final int DIRECTION_SCROLLING_BOTTOM = 1;
+    public static final int DIRECTION_SCROLLING_TOP = -1;
+    public static final int DIRECTION_SCROLLING_BOTTOM = 1;
 
     private TouchUtils() {
         throw new IllegalStateException("Utility class");
     }
 
-    public static void handleTouchPriority(
-            MotionEvent event,
-            View view,
-            int pointerCount,
-            boolean shouldOverrideTouchPriority,
-            boolean isZooming
-    ) {
-        ViewParent viewToDisableTouch = getViewToDisableTouch(view);
+    /**
+     * Manages touch event priority for a view, controlling whether parent views (e.g., RecyclerView or ViewPager2)
+     * should intercept touch events based on scrolling or zooming behavior.
+     *
+     * @param event                   The MotionEvent to process.
+     * @param view                    The view receiving the touch event.
+     * @param pointerCount            The minimum number of pointers for multi-touch gestures.
+     * @param shouldOverrideTouchPriority If true, overrides default touch priority logic.
+     * @param isZooming               If true, indicates a zooming gesture is active.
+     * @throws IllegalArgumentException if event or view is null.
+     */
+    public static void handleTouchPriority(@NonNull MotionEvent event, @NonNull View view,
+                                          int pointerCount, boolean shouldOverrideTouchPriority,
+                                          boolean isZooming) {
+        if (event == null || view == null) {
+            throw new IllegalArgumentException("Event and view cannot be null");
+        }
 
+        ViewParent viewToDisableTouch = getViewToDisableTouch(view);
         if (viewToDisableTouch == null) {
             return;
         }
 
-        boolean canScrollHorizontally =
-                view.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT) && view.canScrollHorizontally(DIRECTION_SCROLLING_LEFT);
-        boolean canScrollVertically =
-                view.canScrollVertically(DIRECTION_SCROLLING_TOP) && view.canScrollVertically(DIRECTION_SCROLLING_BOTTOM);
+        // Check if the view can scroll in both directions
+        boolean canScrollHorizontally = view.canScrollHorizontally(DIRECTION_SCROLLING_RIGHT) &&
+                view.canScrollHorizontally(DIRECTION_SCROLLING_LEFT);
+        boolean canScrollVertically = view.canScrollVertically(DIRECTION_SCROLLING_TOP) &&
+                view.canScrollVertically(DIRECTION_SCROLLING_BOTTOM);
+
         if (shouldOverrideTouchPriority) {
             viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-
             ViewParent viewPager = getViewPager(view);
             if (viewPager != null) {
                 viewPager.requestDisallowInterceptTouchEvent(true);
             }
         } else if (event.getPointerCount() >= pointerCount || canScrollHorizontally || canScrollVertically) {
-            int action = event.getAction();
-
-            if (action == MotionEvent.ACTION_UP) {
-                viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
-            } else if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE || isZooming) {
-                viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:
+                    viewToDisableTouch.requestDisallowInterceptTouchEvent(false);
+                    break;
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                    if (isZooming || canScrollHorizontally || canScrollVertically) {
+                        viewToDisableTouch.requestDisallowInterceptTouchEvent(true);
+                    }
+                    break;
             }
         }
     }
 
+    /**
+     * Finds the nearest RecyclerView parent of the given view to manage touch interception.
+     *
+     * @param startingView The view to start searching from.
+     * @return The RecyclerView parent, or null if none found.
+     */
     private static ViewParent getViewToDisableTouch(View startingView) {
-        ViewParent parentView = startingView.getParent();
-
-        while (parentView != null && !(parentView instanceof RecyclerView)) {
-            parentView = parentView.getParent();
+        ViewParent parent = startingView.getParent();
+        while (parent != null && !(parent instanceof RecyclerView)) {
+            parent = parent.getParent();
         }
-
-        return parentView;
+        return parent;
     }
 
+    /**
+     * Finds the nearest ViewPager2 parent of the given view to manage touch interception.
+     *
+     * @param startingView The view to start searching from.
+     * @return The ViewPager2 parent, or null if none found.
+     */
     private static ViewParent getViewPager(View startingView) {
-        ViewParent parentView = startingView.getParent();
-
-        while (parentView != null && !(parentView instanceof ViewPager2)) {
-            parentView = parentView.getParent();
+        ViewParent parent = startingView.getParent();
+        while (parent != null && !(parent instanceof ViewPager2)) {
+            parent = parent.getParent();
         }
-
-        return parentView;
+        return parent;
     }
 }
